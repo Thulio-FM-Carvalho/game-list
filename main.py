@@ -1,5 +1,7 @@
 from flask import Flask, request
-from pydantic import BaseModel, ValidationError
+from models import GameForm
+from pydantic import ValidationError
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
