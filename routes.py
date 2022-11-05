@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 
 from main import app, db
-from flask import request
+from flask import request, session
 from models import GameForm
 from service import Service
 
@@ -10,6 +10,10 @@ game_service = Service()
 
 @app.route('/jogos', methods=['POST'])
 def add_game():
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        print("Usuário não logado. Por favor faça o login para adicionar novos jogos.")
+        return "", 401
+
     data = request.get_json()
 
     try:
@@ -30,6 +34,10 @@ def add_game():
 
 @app.route('/jogo/<int:game_id>', methods=['DELETE'])
 def remove_game(game_id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        print("Usuário não logado. Por favor faça o login para adicionar novos jogos.")
+        return "", 401
+
     bool = game_service.del_data(game_id)
 
     if bool:
@@ -57,6 +65,10 @@ def find_game_by_id(game_id):
 
 @app.route('/jogo/<int:game_id>', methods=['PUT'])
 def update_game(game_id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        print("Usuário não logado. Por favor faça o login para adicionar novos jogos.")
+        return "", 401
+
     data = request.get_json()
     name = data['name']
     category = data['category']
@@ -67,3 +79,24 @@ def update_game(game_id):
         return "", 200
     else:
         return "", 404
+
+
+@app.route('/autenticar', methods=['POST'])
+def autenticar():
+
+    data = request.get_json()
+    user_form = data['nome']
+    password_form = data['senha']
+
+    auth = game_service.autenticar(user_form, password_form)
+
+    if auth:
+        return "", 200
+    else:
+        return "", 404
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session['usuario_logado'] = None
+    return "", 200

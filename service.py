@@ -1,4 +1,6 @@
-from models import GameForm, Jogos
+from flask import session
+
+from models import GameForm, Jogos, Usuarios
 from main import db
 
 
@@ -51,3 +53,17 @@ class Service:
         else:
             db.session.commit()
             return True
+
+    def autenticar(self, user_form, password_form):
+        usuario = Usuarios.query.filter_by(nome=user_form).first()
+
+        if usuario:
+            if password_form == usuario.senha:
+                print("Usuário logado com sucesso.")
+                session['usuario_logado'] = usuario.nome
+                return True
+            else:
+                print("Usuario não logado, por favor tente novamente.")
+                return False
+
+
