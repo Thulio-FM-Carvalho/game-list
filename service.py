@@ -21,9 +21,33 @@ class Service:
 
     def del_data(self, game_id):
 
-        game_id = Jogos.query.filter_by(id=game_id).first()
-        if not game_id:
+        result = Jogos.query.filter_by(id=game_id).delete()
+        if result == 0:
             print("Não existe nenhum jogo com este ID no banco de dados.")
+            return False
         else:
-            Jogos.query.filter_by(id=game_id).delete()
             db.session.commit()
+            return True
+
+    def get_all_games(self):
+
+        games = Jogos.query.all()
+
+        return games
+
+    def get_game_by_id(self, game_id):
+        game = Jogos.query.filter_by(id=game_id).first()
+        if game == None:
+            print("Não existe nenhum jogo com esse ID no banco de dados")
+
+        else:
+            return game
+
+    def update_game_by_id(self, game_id, name, category, console):
+        game = Jogos.query.filter_by(id=game_id).update(dict(nome=name, categoria=category, console=console))
+        if game == 0:
+            print("Não existe nenhum jogo com este ID no banco de dados.")
+            return False
+        else:
+            db.session.commit()
+            return True

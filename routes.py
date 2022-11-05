@@ -8,7 +8,7 @@ from service import Service
 game_service = Service()
 
 
-@app.route('/add', methods=['POST'])
+@app.route('/jogos', methods=['POST'])
 def add_game():
     data = request.get_json()
 
@@ -17,24 +17,53 @@ def add_game():
         game_service.send_data(form)
     except ValidationError as e:
         return {
-            'title': 'Erro de validação',
-            'details': e.errors()
-        }, 400
+                   'title': 'Erro de validação',
+                   'details': e.errors()
+               }, 400
     except Exception as er:
         return {
-                    'title': "Erro interno no servidor",
-                    'content': "Por favor, tente novamente."
+                   'title': "Erro interno no servidor",
+                   'content': "Por favor, tente novamente."
                }, 500
-    return '', 200
+    return '', 201
 
 
-@app.route('/remove/<int:game_id>', methods=['DELETE'])
+@app.route('/jogo/<int:game_id>', methods=['DELETE'])
 def remove_game(game_id):
-    id = game_id
-    game_service.del_data(id)
+    bool = game_service.del_data(game_id)
 
-    return "", 204
+    if bool:
+        return "", 204
+    else:
+        return "", 404
 
-@app.route('/gamelist', methods=['GET'])
+
+@app.route('/jogos', methods=['GET'])
 def get_all_game():
-    return "", 200
+    games = game_service.get_all_games()
+    records = [z.to_json() for z in games]
+    return records, 200
+
+
+@app.route('/jogo/<int:game_id>', methods=['GET'])
+def find_game_by_id(game_id):
+    game = game_service.get_game_by_id(game_id)
+    if game:
+        return "", 404
+    else:
+        records = game.to_json()
+    return records, 200
+
+
+@app.route('/jogo/<int:game_id>', methods=['PUT'])
+def update_game(game_id):
+    data = request.get_json()
+    name = data['name']
+    category = data['category']
+    console = data['console']
+    game = game_service.update_game_by_id(game_id, name, category, console)
+
+    if game:
+        return "", 200
+    else:
+        return "", 404
