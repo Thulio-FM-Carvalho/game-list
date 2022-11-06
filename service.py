@@ -1,3 +1,6 @@
+import base64
+from codecs import encode
+
 from flask import session
 
 from models import GameForm, Jogos, Usuarios
@@ -10,6 +13,7 @@ class Service:
         name = form_data.name
         category = form_data.category
         console = form_data.console
+        imgd = form_data.img
 
         game = Jogos.query.filter_by(nome=name).first()
 
@@ -17,7 +21,7 @@ class Service:
             print("Jogo já existente. Por favor tente adicionar outro jogo.")
             raise
         else:
-            new_game = Jogos(nome=name, categoria=category, console=console)
+            new_game = Jogos(nome=name, categoria=category, console=console, img=imgd)
             db.session.add(new_game)
             db.session.commit()
 
@@ -65,5 +69,3 @@ class Service:
             else:
                 print("Usuario não logado, por favor tente novamente.")
                 return False
-
-

@@ -1,3 +1,8 @@
+import base64
+import json
+from codecs import encode
+
+import pm as pm
 from pydantic import ValidationError
 
 from main import app, db
@@ -34,9 +39,7 @@ def add_game():
 
 @app.route('/jogo/<int:game_id>', methods=['DELETE'])
 def remove_game(game_id):
-    if 'usuario_logado' not in session or session['usuario_logado'] == None:
-        print("Usuário não logado. Por favor faça o login para adicionar novos jogos.")
-        return "", 401
+
 
     bool = game_service.del_data(game_id)
 
@@ -83,7 +86,6 @@ def update_game(game_id):
 
 @app.route('/autenticar', methods=['POST'])
 def autenticar():
-
     data = request.get_json()
     user_form = data['nome']
     password_form = data['senha']
@@ -99,4 +101,23 @@ def autenticar():
 @app.route('/logout', methods=['GET'])
 def logout():
     session['usuario_logado'] = None
+    return "", 200
+
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    data = request.get_json()
+    files = data['img_data']
+
+    # data_as_dictionary = json.loads(json.loads(data.decode('utf-8')))
+    base64_img = files
+    bytes_img = encode(base64_img, 'utf-8')
+    binary_img = base64.decodebytes(bytes_img)
+
+    with open("imageToSave.jpg", "wb") as fh:
+        fh.write(binary_img)
+
+    print(binary_img)
+
+    print(type(files))
     return "", 200

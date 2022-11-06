@@ -30,6 +30,7 @@ TABLES['Jogos'] = ('''
       `nome` varchar(50) NOT NULL,
       `categoria` varchar(40) NOT NULL,
       `console` varchar(20) NOT NULL,
+      `img` longtext NOT NULL,
       PRIMARY KEY (`id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;''')
 
@@ -69,14 +70,14 @@ for user in cursor.fetchall():
     print(user[1])
 
 # inserindo jogos
-jogos_sql = 'INSERT INTO jogos (nome, categoria, console) VALUES (%s, %s, %s)'
+jogos_sql = 'INSERT INTO jogos (nome, categoria, console, img) VALUES (%s, %s, %s, %s)'
 jogos = [
-      ('Tetris', 'Puzzle', 'Atari'),
-      ('God of War', 'Hack n Slash', 'PS2'),
-      ('Mortal Kombat', 'Luta', 'PS2'),
-      ('Valorant', 'FPS', 'PC'),
-      ('Crash Bandicoot', 'Hack n Slash', 'PS2'),
-      ('Need for Speed', 'Corrida', 'PS2'),
+      ('Tetris', 'Puzzle', 'Atari', 'aaa'),
+      ('God of War', 'Hack n Slash', 'PS2', 'aaa'),
+      ('Mortal Kombat', 'Luta', 'PS2', 'aaa'),
+      ('Valorant', 'FPS', 'PC', 'aaa'),
+      ('Crash Bandicoot', 'Hack n Slash', 'PS2', 'aaa'),
+      ('Need for Speed', 'Corrida', 'PS2', 'aaa'),
 ]
 cursor.executemany(jogos_sql, jogos)
 
