@@ -7,7 +7,6 @@ class Jogos(db.Model):
     nome = db.Column(db.String(50), nullable=False)
     categoria = db.Column(db.String(40), nullable=False)
     console = db.Column(db.String(20), nullable=False)
-    img = db.Column(db.String(4294000000), nullable=False)
 
     def __repr__(self):
         return '<Name %r>' % self.nome
@@ -18,7 +17,6 @@ class Jogos(db.Model):
             "nome": self.nome,
             "categoria": self.categoria,
             "console": self.console,
-            "img": self.img
         }
 
 

@@ -1,10 +1,12 @@
 import base64
+import time
 from codecs import encode
 
 from flask import session
 
+from helpers import deleta_arquivo
 from models import GameForm, Jogos, Usuarios
-from main import db
+from main import db, app
 
 
 class Service:
@@ -13,7 +15,7 @@ class Service:
         name = form_data.name
         category = form_data.category
         console = form_data.console
-        imgd = form_data.img
+        base64_img = form_data.img
 
         game = Jogos.query.filter_by(nome=name).first()
 
@@ -21,9 +23,53 @@ class Service:
             print("Jogo já existente. Por favor tente adicionar outro jogo.")
             raise
         else:
-            new_game = Jogos(nome=name, categoria=category, console=console, img=imgd)
+            new_game = Jogos(nome=name, categoria=category, console=console)
             db.session.add(new_game)
             db.session.commit()
+
+        bytes_img = encode(base64_img, 'utf-8')
+        binary_img = base64.decodebytes(bytes_img)
+
+        timestamp = time.time()
+        upload_path = app.config['UPLOAD_PATH']
+
+        with open(f'{upload_path}/capa{new_game.id}-{timestamp}.jpg', "wb") as fh:
+            fh.write(binary_img)
+
+    def get_all_games(self):
+
+        games = Jogos.query.all()
+
+        return games
+
+    def get_game_by_id(self, game_id):
+        game = Jogos.query.filter_by(id=game_id).first()
+        print(game)
+        if game == None:
+            print("Não existe nenhum jogo com esse ID no banco de dados")
+
+        else:
+            return game
+
+    def update_game_by_id(self, game_id, name, category, console, img):
+        game = Jogos.query.filter_by(id=game_id).update(dict(nome=name, categoria=category, console=console))
+
+        upload_path = app.config['UPLOAD_PATH']
+        timestamp = time.time()
+        deleta_arquivo(game_id)
+
+        bytes_img = encode(img, 'utf-8')
+        binary_img = base64.decodebytes(bytes_img)
+
+        with open(f'{upload_path}/capa{game_id}-{timestamp}.jpg', "wb") as fh:
+            fh.write(binary_img)
+
+        if game == 0:
+            print("Não existe nenhum jogo com este ID no banco de dados.")
+            return False
+        else:
+            db.session.commit()
+            return True
 
     def del_data(self, game_id):
 
@@ -35,30 +81,7 @@ class Service:
             db.session.commit()
             return True
 
-    def get_all_games(self):
-
-        games = Jogos.query.all()
-
-        return games
-
-    def get_game_by_id(self, game_id):
-        game = Jogos.query.filter_by(id=game_id).first()
-        if game == None:
-            print("Não existe nenhum jogo com esse ID no banco de dados")
-
-        else:
-            return game
-
-    def update_game_by_id(self, game_id, name, category, console):
-        game = Jogos.query.filter_by(id=game_id).update(dict(nome=name, categoria=category, console=console))
-        if game == 0:
-            print("Não existe nenhum jogo com este ID no banco de dados.")
-            return False
-        else:
-            db.session.commit()
-            return True
-
-    def autenticar(self, user_form, password_form):
+    def auth(self, user_form, password_form):
         usuario = Usuarios.query.filter_by(nome=user_form).first()
 
         if usuario:

@@ -1,3 +1,4 @@
+import os
 
 SECRET_KEY = 'alura'
 #fazendo a conexão com o banco de dados
@@ -9,3 +10,5 @@ SQLALCHEMY_DATABASE_URI = \
         servidor = 'localhost',
         database = 'game_list'
     )
+
+UPLOAD_PATH = os.path.dirname(os.path.abspath(__file__)) + '/uploads'

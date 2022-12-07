@@ -1,11 +1,9 @@
 import base64
-import json
 from codecs import encode
-
-import pm as pm
 from pydantic import ValidationError
 
-from main import app, db
+from helpers import recupera_imagem
+from main import app
 from flask import request, session
 from models import GameForm
 from service import Service
@@ -13,8 +11,8 @@ from service import Service
 game_service = Service()
 
 
-@app.route('/jogos', methods=['POST'])
-def add_game():
+@app.route('/jogo', methods=['POST'])
+def add():
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         print("Usuário não logado. Por favor faça o login para adicionar novos jogos.")
         return "", 401
@@ -37,37 +35,25 @@ def add_game():
     return '', 201
 
 
-@app.route('/jogo/<int:game_id>', methods=['DELETE'])
-def remove_game(game_id):
-
-
-    bool = game_service.del_data(game_id)
-
-    if bool:
-        return "", 204
-    else:
-        return "", 404
-
-
-@app.route('/jogos', methods=['GET'])
-def get_all_game():
+@app.route('/jogo', methods=['GET'])
+def get_all():
     games = game_service.get_all_games()
     records = [z.to_json() for z in games]
     return records, 200
 
 
 @app.route('/jogo/<int:game_id>', methods=['GET'])
-def find_game_by_id(game_id):
+def get_by_id(game_id):
     game = game_service.get_game_by_id(game_id)
     if game:
-        return "", 404
-    else:
         records = game.to_json()
+    else:
+        return "", 404
     return records, 200
 
 
 @app.route('/jogo/<int:game_id>', methods=['PUT'])
-def update_game(game_id):
+def update(game_id):
     if 'usuario_logado' not in session or session['usuario_logado'] == None:
         print("Usuário não logado. Por favor faça o login para adicionar novos jogos.")
         return "", 401
@@ -76,7 +62,8 @@ def update_game(game_id):
     name = data['name']
     category = data['category']
     console = data['console']
-    game = game_service.update_game_by_id(game_id, name, category, console)
+    img = data['img']
+    game = game_service.update_game_by_id(game_id, name, category, console, img)
 
     if game:
         return "", 200
@@ -84,13 +71,23 @@ def update_game(game_id):
         return "", 404
 
 
+@app.route('/jogo/<int:game_id>', methods=['DELETE'])
+def remove(game_id):
+    bool = game_service.del_data(game_id)
+
+    if bool:
+        return "", 204
+    else:
+        return "", 404
+
+
 @app.route('/autenticar', methods=['POST'])
-def autenticar():
+def auth():
     data = request.get_json()
     user_form = data['nome']
     password_form = data['senha']
 
-    auth = game_service.autenticar(user_form, password_form)
+    auth = game_service.auth(user_form, password_form)
 
     if auth:
         return "", 200
@@ -114,7 +111,7 @@ def upload():
     bytes_img = encode(base64_img, 'utf-8')
     binary_img = base64.decodebytes(bytes_img)
 
-    with open("imageToSave.jpg", "wb") as fh:
+    with open("uploads/imageToSave.jpg", "wb") as fh:
         fh.write(binary_img)
 
     print(binary_img)
