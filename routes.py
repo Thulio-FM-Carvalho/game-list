@@ -81,7 +81,7 @@ def remove(game_id):
         return "", 404
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/autenticar', methods=['POST'])
 def auth():
     data = request.get_json()
     user_form = data['nome']
