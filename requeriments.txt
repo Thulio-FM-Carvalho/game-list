@@ -1,4 +1,0 @@
-SQLAlchemy
-Flask
-pydantic
-mysql-connector-python
