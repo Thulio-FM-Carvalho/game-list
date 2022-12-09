@@ -47,6 +47,13 @@ def get_by_id(game_id):
     game = game_service.get_game_by_id(game_id)
     if game:
         records = game.to_json()
+
+        img = recupera_imagem(game_id)
+        with open(f"uploads/{img}", "rb") as img_file:
+            my_string = base64.b64encode(img_file.read())
+
+        records['img'] = my_string.decode('utf-8')
+
     else:
         return "", 404
     return records, 200
@@ -81,7 +88,7 @@ def remove(game_id):
         return "", 404
 
 
-@app.route('/autenticar', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def auth():
     data = request.get_json()
     user_form = data['nome']
@@ -106,15 +113,10 @@ def upload():
     data = request.get_json()
     files = data['img_data']
 
-    # data_as_dictionary = json.loads(json.loads(data.decode('utf-8')))
     base64_img = files
     bytes_img = encode(base64_img, 'utf-8')
     binary_img = base64.decodebytes(bytes_img)
 
     with open("uploads/imageToSave.jpg", "wb") as fh:
         fh.write(binary_img)
-
-    print(binary_img)
-
-    print(type(files))
     return "", 200

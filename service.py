@@ -7,6 +7,7 @@ from flask import session
 from helpers import deleta_arquivo
 from models import GameForm, Jogos, Usuarios
 from main import db, app
+from flask_bcrypt import check_password_hash
 
 
 class Service:
@@ -44,7 +45,6 @@ class Service:
 
     def get_game_by_id(self, game_id):
         game = Jogos.query.filter_by(id=game_id).first()
-        print(game)
         if game == None:
             print("Não existe nenhum jogo com esse ID no banco de dados")
 
@@ -84,11 +84,12 @@ class Service:
     def auth(self, user_form, password_form):
         usuario = Usuarios.query.filter_by(nome=user_form).first()
 
-        if usuario:
-            if password_form == usuario.senha:
-                print("Usuário logado com sucesso.")
-                session['usuario_logado'] = usuario.nome
-                return True
-            else:
-                print("Usuario não logado, por favor tente novamente.")
-                return False
+        senha = check_password_hash(usuario.senha, password_form)
+
+        if usuario and senha:
+            print("Usuário logado com sucesso.")
+            session['usuario_logado'] = usuario.nome
+            return True
+        else:
+            print("Usuario não logado, por favor tente novamente.")
+            return False
