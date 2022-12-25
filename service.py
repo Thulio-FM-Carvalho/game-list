@@ -1,5 +1,4 @@
 import base64
-import time
 from codecs import encode
 
 from flask import session
@@ -31,10 +30,9 @@ class Service:
         bytes_img = encode(base64_img, 'utf-8')
         binary_img = base64.decodebytes(bytes_img)
 
-        timestamp = time.time()
         upload_path = app.config['UPLOAD_PATH']
 
-        with open(f'{upload_path}/capa{new_game.id}-{timestamp}.jpg', "wb") as fh:
+        with open(f'{upload_path}/{new_game.id}.jpg', "wb") as fh:
             fh.write(binary_img)
 
     def get_all_games(self):
@@ -52,24 +50,27 @@ class Service:
             return game
 
     def update_game_by_id(self, game_id, name, category, console, img):
-        game = Jogos.query.filter_by(id=game_id).update(dict(nome=name, categoria=category, console=console))
-
-        upload_path = app.config['UPLOAD_PATH']
-        timestamp = time.time()
-        deleta_arquivo(game_id)
-
-        bytes_img = encode(img, 'utf-8')
-        binary_img = base64.decodebytes(bytes_img)
-
-        with open(f'{upload_path}/capa{game_id}-{timestamp}.jpg', "wb") as fh:
-            fh.write(binary_img)
-
-        if game == 0:
-            print("Não existe nenhum jogo com este ID no banco de dados.")
-            return False
+        game = Jogos.query.filter_by(nome=name).first()
+        if game:
+            print("Jogo já existente.")
         else:
-            db.session.commit()
-            return True
+            game = Jogos.query.filter_by(id=game_id).update(dict(nome=name, categoria=category, console=console))
+
+            upload_path = app.config['UPLOAD_PATH']
+            deleta_arquivo(game_id)
+
+            bytes_img = encode(img, 'utf-8')
+            binary_img = base64.decodebytes(bytes_img)
+
+            with open(f'{upload_path}/{game_id}.jpg', "wb") as fh:
+                fh.write(binary_img)
+
+            if game == 0:
+                print("Não existe nenhum jogo com este ID no banco de dados.")
+                return False
+            else:
+                db.session.commit()
+                return True
 
     def del_data(self, game_id):
 
@@ -78,6 +79,7 @@ class Service:
             print("Não existe nenhum jogo com este ID no banco de dados.")
             return False
         else:
+            deleta_arquivo(game_id)
             db.session.commit()
             return True
 

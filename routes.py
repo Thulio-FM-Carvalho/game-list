@@ -49,10 +49,13 @@ def get_by_id(game_id):
         records = game.to_json()
 
         img = recupera_imagem(game_id)
-        with open(f"uploads/{img}", "rb") as img_file:
-            my_string = base64.b64encode(img_file.read())
+        if img is None:
+            records['img'] = ""
+        else:
+            with open(f"uploads/{img}", "rb") as img_file:
+                my_string = base64.b64encode(img_file.read())
 
-        records['img'] = my_string.decode('utf-8')
+            records['img'] = my_string.decode('utf-8')
 
     else:
         return "", 404
@@ -105,18 +108,4 @@ def auth():
 @app.route('/logout', methods=['GET'])
 def logout():
     session['usuario_logado'] = None
-    return "", 200
-
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    data = request.get_json()
-    files = data['img_data']
-
-    base64_img = files
-    bytes_img = encode(base64_img, 'utf-8')
-    binary_img = base64.decodebytes(bytes_img)
-
-    with open("uploads/imageToSave.jpg", "wb") as fh:
-        fh.write(binary_img)
     return "", 200
